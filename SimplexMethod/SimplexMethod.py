@@ -26,32 +26,34 @@ def initBaseTable(a, b, c, baseTable):
 	for _ in range(len(a) + 1):
 		baseTable[len(a) + 1].append(0)
 
-def isOptimalPlan(baseTable):
+def isOptimalPlan(baseTable, problemType):
 	indexStr = baseTable[len(baseTable) - 1]
 
 	for i in range(1, len(indexStr)):
-		if indexStr[i] > 0: # < for maximization
+		if ((indexStr[i] > 0) and (problemType == 'min')) or (
+			(indexStr[i] < 0) and (problemType == 'max')):
 			return False
 	return True
 
-def findColumn(baseTable):
+def findColumn(baseTable, problemType):
 	indexStr = baseTable[len(baseTable) - 1]
-	maxVal = -1#float('inf')
+	maxVal = -1 if problemType == 'min' else float('inf')
 	columnIndex = -1
 
 	for i in range(1, len(indexStr)):
-		if indexStr[i] > maxVal: # <  for maximization
+		if ((indexStr[i] > maxVal) and (problemType == 'min')) or (
+			(indexStr[i] < maxVal) and (problemType == 'max')):
 			maxVal = indexStr[i]
 			columnIndex = i
 
 	return columnIndex
 
-def findString(column, baseTable, a):
+def findString(column, baseTable):
 	strIndex = -1
 	minVal = float('inf')
 	bIndex = len(baseTable[0]) - 1
 
-	for i in range(1, len(a) + 1):
+	for i in range(1, len(baseTable) - 1):
 		if baseTable[i][column] > 0:
 			value = baseTable[i][bIndex] / baseTable[i][column]
 			if value < minVal:
@@ -78,23 +80,25 @@ def recalcSimplexTable(string, column, baseTable):
 	newTable[string][0] = baseTable[0][column]
 	return newTable
 
-def simplexMethod(baseTable, a):
-	while isOptimalPlan(baseTable) is False:
-		column = findColumn(baseTable)
-		string = findString(column, baseTable, a)
+def simplexMethod(baseTable, problemType):
+	while isOptimalPlan(baseTable, problemType) is False:
+		column = findColumn(baseTable, problemType)
+		string = findString(column, baseTable)
 		baseTable = recalcSimplexTable(string, column, baseTable)
 		
 	return baseTable
 
-def printResult(baseTable, c, a):
-	result = copy.deepcopy(c)
-	for i in range(len(c)):
+def printResult(baseTable):
+	result = []
+	for i in range(len(baseTable[0]) - len(baseTable)):
 		baseVar = False
-		for j in range(len(a)):
+		for j in range(len(baseTable) - 2):
 			if baseTable[j + 1][0] == ('x' + str(i + 1)):
 				baseVar = True
 				break
-		result[i] = baseTable[j + 1][len(baseTable[0]) - 1] if baseVar else 0
+		value = baseTable[j + 1][len(baseTable[0]) - 1] if baseVar else 0
+		result.append(value)
+	
 	for i in range(len(result)):
 		print('x' + str(i + 1) + ' = ' + str(result[i]))
 
@@ -110,13 +114,14 @@ def Main():
 	for i in range(len(baseTable)):
 		print(baseTable[i])
 
-	baseTable = simplexMethod(baseTable, a)
+	problemType = 'max' #'min'
+	baseTable = simplexMethod(baseTable, problemType)
 
 	print('\nFinal table')
 	for i in range(len(baseTable)):
 		print(baseTable[i])
 
 	print('\nResult')
-	printResult(baseTable, c, a)
+	printResult(baseTable)
 
 Main()
