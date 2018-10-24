@@ -69,12 +69,12 @@ def recalcSimplexTable(string, column, baseTable):
 	newTable = copy.deepcopy(baseTable)
 
 	for i in range(1, columnCount):
-		newTable[string][i] /= elem
+		newTable[string][i] = int((newTable[string][i] / elem) * 100) / 100
 
 	for i in range(1, stringCount):
 		if i != string:
 			for j in range(1, columnCount):
-				newTable[i][j] = baseTable[i][j] - (baseTable[string][j] * baseTable[i][column]) / elem
+				newTable[i][j] = int((baseTable[i][j] - (baseTable[string][j] * baseTable[i][column]) / elem) * 100) / 100
 			newTable[i][column] = 0
 
 	newTable[string][0] = baseTable[0][column]
@@ -102,6 +102,12 @@ def printResult(baseTable):
 	for i in range(len(result)):
 		print('x' + str(i + 1) + ' = ' + str(result[i]))
 
+def printTable(baseTable):
+	for i in range(len(baseTable)):
+		for j in range(len(baseTable[i])):
+			print('{0:6} |'.format(baseTable[i][j]), end=' ')
+		print()
+
 def Main():
 	a = [[2, 1, 3, 4], [1, -1, 2, 1], [0, 0, 1, 3]]
 	b = [2, 4, 1]
@@ -111,15 +117,13 @@ def Main():
 	initBaseTable(a, b, c, baseTable)
 
 	print('Base table')
-	for i in range(len(baseTable)):
-		print(baseTable[i])
+	printTable(baseTable)
 
 	problemType = 'max' #'min'
 	baseTable = simplexMethod(baseTable, problemType)
 
 	print('\nFinal table')
-	for i in range(len(baseTable)):
-		print(baseTable[i])
+	printTable(baseTable)
 
 	print('\nResult')
 	printResult(baseTable)
